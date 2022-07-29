@@ -1,23 +1,19 @@
 package main
 
 import (
-	//"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
-	"time"
-
-	//"io/ioutil"
-	//"net/http"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
 
 func main() {
-	//args := os.Args[1]
-	//token := args
 	token := os.Getenv("DAUTH_TOKEN")
 
 	newSession, err := discordgo.New("Bot " + token)
@@ -29,7 +25,6 @@ func main() {
 	fmt.Println(newSession.Identify.Token)
 
 	newSession.AddHandler(createMsg)
-
 	newSession.Identify.Intents = discordgo.IntentsGuildMessages
 
 	err = newSession.Open()
@@ -40,8 +35,8 @@ func main() {
 
 	fmt.Println("Mini is awake, press CTRL-C to sleep")
 	signalInput := make(chan os.Signal, 1)
-
 	signal.Notify(signalInput, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+
 	<-signalInput
 
 	// close the connection
@@ -73,22 +68,49 @@ func createMsg(session *discordgo.Session, msg *discordgo.MessageCreate) {
 		session.ChannelMessageSend(msg.ChannelID, "Ping!")
 	case "hello":
 		session.ChannelMessageSend(msg.ChannelID, "I'm living in your walls")
-	case "why?":
+	case "why":
 		session.ChannelMessageSend(msg.ChannelID, "Why not?")
-	case "who am I":
+	case "who":
 		{
 			var imageEmbed discordgo.MessageEmbedImage
 			imageEmbed.URL = msg.Author.AvatarURL("128")
+
+			var msgEmbed discordgo.MessageEmbedFooter
+			msgEmbed.Text = msg.Member.JoinedAt.Local().Format(time.ANSIC)
 
 			var embed discordgo.MessageEmbed
 			embed.Title = msg.Author.Username
 			embed.Image = &imageEmbed
 			embed.Color = randColor()
 			embed.Description = "Profile embed test"
+			embed.Footer = &msgEmbed
 
 			session.ChannelMessageSendEmbed(msg.ChannelID, &embed)
 		}
-		// purge messages in current channel
+	// change user profile picture with danbooru
+	case "setpfp":
+		{
+			// test: access testbooru and post an image into server chat
+			res, err := http.Get("https://testbooru.donmai.us/")
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			body, err := ioutil.ReadAll(res.Body)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			str := string(body)
+			fmt.Println(str)
+
+			res.Body.Close()
+
+			// find a post on the website with the given tags (if none, pick a random one)
+
+			// accept optional tags
+		}
+	// purge messages in current channel
 	case "cls":
 		{
 			var msgArr []string
@@ -101,6 +123,8 @@ func createMsg(session *discordgo.Session, msg *discordgo.MessageCreate) {
 			if err != nil {
 				fmt.Println("Mini failed to delete all messages in all channels")
 			}
+
+			session.ChannelMessageSend(msg.ChannelID, "cleared")
 		}
 	// purge messages in all channels
 	case "cls-all":
