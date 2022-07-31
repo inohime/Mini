@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -87,28 +88,56 @@ func createMsg(session *discordgo.Session, msg *discordgo.MessageCreate) {
 
 			session.ChannelMessageSendEmbed(msg.ChannelID, &embed)
 		}
-	// change user profile picture with danbooru
+	// change user profile picture with gelbooru/danbooru
 	case "setpfp":
 		{
-			// test: access testbooru and post an image into server chat
-			res, err := http.Get("https://testbooru.donmai.us/")
+			rand.Seed(time.Now().Unix())
+
+			postNumber := rand.Intn(100) // hard cap for now
+			url := fmt.Sprintf("https://testbooru.donmai.us/posts/%d", postNumber)
+			fmt.Println(url)
+
+			response, err := http.Get(url)
 			if err != nil {
 				fmt.Println(err)
 			}
 
-			body, err := ioutil.ReadAll(res.Body)
-			if err != nil {
-				fmt.Println(err)
+			if response.StatusCode != 200 {
+				fmt.Println("Bad request")
 			}
 
-			str := string(body)
-			fmt.Println(str)
+			body, err := ioutil.ReadAll(response.Body)
+			if err != nil {
+				fmt.Println("Failed to read body")
+			}
 
-			res.Body.Close()
+			defer response.Body.Close()
 
-			// find a post on the website with the given tags (if none, pick a random one)
+			base := string(body)
+			// find the image source (quick)
+			// bad way to ignore mp4's, fix later
+			if strings.Contains(base, ".mp4") {
+				return
+			}
 
-			// accept optional tags
+			var lhs int
+			var rhs int
+			var bit int
+
+			if strings.Contains(base, "sample") {
+				bit = strings.Index(base, "sample")
+			} else if strings.Contains(base, "original") {
+				bit = strings.Index(base, "original")
+			}
+
+			lhs = strings.LastIndex(base[:bit], `"`)
+			rhs = strings.Index(base[bit:], ">")
+			// piece it together
+			image := strings.Join(strings.Split(base[lhs:bit+rhs], `"`), "")
+
+			fmt.Println(image)
+
+			session.ChannelMessageSend(msg.ChannelID, string(image))
 		}
 	// purge messages in current channel
 	case "cls":
