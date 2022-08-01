@@ -100,15 +100,18 @@ func createMsg(session *discordgo.Session, msg *discordgo.MessageCreate) {
 			response, err := http.Get(url)
 			if err != nil {
 				fmt.Println(err)
+				return
 			}
 
 			if response.StatusCode != 200 {
 				fmt.Println("Bad request")
+				return
 			}
 
 			body, err := ioutil.ReadAll(response.Body)
 			if err != nil {
 				fmt.Println("Failed to read body")
+				return
 			}
 
 			defer response.Body.Close()
@@ -120,8 +123,6 @@ func createMsg(session *discordgo.Session, msg *discordgo.MessageCreate) {
 				return
 			}
 
-			var lhs int
-			var rhs int
 			var bit int
 
 			if strings.Contains(base, "sample") {
@@ -130,14 +131,19 @@ func createMsg(session *discordgo.Session, msg *discordgo.MessageCreate) {
 				bit = strings.Index(base, "original")
 			}
 
-			lhs = strings.LastIndex(base[:bit], `"`)
-			rhs = strings.Index(base[bit:], ">")
+			lhs := strings.LastIndex(base[:bit], `"`)
+			rhs := strings.Index(base[bit:], ">")
 			// piece it together
 			image := strings.Join(strings.Split(base[lhs:bit+rhs], `"`), "")
 
-			fmt.Println(image)
+			// find the artist
 
-			session.ChannelMessageSend(msg.ChannelID, string(image))
+			// find the image tags
+
+			// create an embed with the data
+			embed := createEmbed(msg, image)
+
+			session.ChannelMessageSendEmbed(msg.ChannelID, &embed)
 		}
 	// purge messages in current channel
 	case "cls":
@@ -180,4 +186,34 @@ func createMsg(session *discordgo.Session, msg *discordgo.MessageCreate) {
 			}
 		}
 	}
+}
+
+func createEmbed(msg *discordgo.MessageCreate, imageURL string) discordgo.MessageEmbed {
+	// create an embed with the data
+	var imageEmbed discordgo.MessageEmbedImage
+	// modify image size for embeds
+	imageEmbed.URL = imageURL
+
+	var footerEmbed discordgo.MessageEmbedFooter
+	footerEmbed.Text = "Requested at: " + time.Now().Local().Format(time.ANSIC)
+
+	fieldEmbed := make([]discordgo.MessageEmbedField, 3)
+	fieldEmbed[0].Name = "Artist"
+	fieldEmbed[0].Value = "Artist Name Here"
+	fieldEmbed[1].Name = "Tags"
+	fieldEmbed[1].Value = "Tags Here"
+	fieldEmbed[2].Name = "Link"
+	fieldEmbed[2].Value = "Image link"
+
+	var embed discordgo.MessageEmbed
+	embed.Title = "Recommendation for " + msg.Author.Username
+	embed.Image = &imageEmbed
+	embed.Color = randColor()
+	embed.Description = "Profile embed test"
+	for i := range fieldEmbed {
+		embed.Fields = append(embed.Fields, &fieldEmbed[i])
+	}
+	embed.Footer = &footerEmbed
+
+	return embed
 }
