@@ -25,6 +25,8 @@ func (*ClearCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCrea
 	var msgIDs []string
 	var oldMsgIDs []*discordgo.Message
 
+	// add blacklist for announcements channel
+
 	msgs, _ := s.ChannelMessages(ic.ChannelID, 100, "", "", "")
 	for _, msg := range msgs {
 		if time.Since(msg.Timestamp).Hours() > 336 {

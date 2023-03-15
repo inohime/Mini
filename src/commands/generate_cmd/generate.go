@@ -81,10 +81,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 func acquireTagsData() *utils.Tags {
 	doc := utils.FetchPageNode("https://danbooru.donmai.us/posts/6145011")
 
-	tags := utils.Tags{
-		Data: make(map[string][]string, 6),
-		Node: doc,
-	}
+	tags := utils.NewTag(doc)
 
 	tags.Sync.Add(6)
 	go tags.FindArtistName()
@@ -95,5 +92,5 @@ func acquireTagsData() *utils.Tags {
 	go tags.FindCopyright()
 	tags.Sync.Wait()
 
-	return &tags
+	return tags
 }

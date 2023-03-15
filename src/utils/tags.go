@@ -13,6 +13,13 @@ type Tags struct {
 	Sync sync.WaitGroup
 }
 
+func NewTag(node *html.Node) *Tags {
+	return &Tags{
+		Data: make(map[string][]string, 6),
+		Node: node,
+	}
+}
+
 func (t *Tags) FindArtistName() {
 	t.Lock()
 	defer t.Unlock()
