@@ -60,10 +60,12 @@ func FetchPageNode(url string) *html.Node {
 
 func StringsToMarkup(s []string, uri string) []string {
 	markedUp := make([]string, len(s))
+
 	for i, tag := range s {
 		encoded := url.QueryEscape(tag)
 		markedUp[i] = fmt.Sprintf("[%s](%sposts?tags=%s&z=1)", tag, uri, encoded)
 	}
+
 	return markedUp
 }
 
@@ -80,13 +82,13 @@ func searchForElement(node *html.Node, firstAttr, firstVal, secondAttr string, w
 	findNext = func(n *html.Node) {
 		if n.Type == html.ElementNode {
 			found := false
-
 			for _, attr := range n.Attr {
 				if attr.Key == firstAttr {
 					if strings.Contains(attr.Val, firstVal) {
 						found = true
 					}
 				}
+
 				if attr.Key == secondAttr {
 					if found {
 						content = append(content, attr.Val)

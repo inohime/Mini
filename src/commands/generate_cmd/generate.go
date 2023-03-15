@@ -86,14 +86,14 @@ func acquireTagsData() *utils.Tags {
 		Node: doc,
 	}
 
-	tags.Wg.Add(6)
+	tags.Sync.Add(6)
 	go tags.FindArtistName()
 	go tags.FindGeneralTags()
 	go tags.FindImageUrl()
 	go tags.FindImageSource()
 	go tags.FindCharacters()
 	go tags.FindCopyright()
-	tags.Wg.Wait()
+	tags.Sync.Wait()
 
 	return &tags
 }
