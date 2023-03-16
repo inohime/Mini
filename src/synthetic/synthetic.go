@@ -109,7 +109,10 @@ func (synth *Synthetic) SetupHandlers() {
 			synth.Session.State.User.Discriminator,
 			color.HiGreenString("logged in"),
 		)
-		synth.Session.UpdateListeningStatus("your requests~!")
+		err := synth.Session.UpdateListeningStatus("your requests~!")
+		if err != nil {
+			log.Println(printRed("Failed to update status:%s", printWhite(err)))
+		}
 	})
 }
 
@@ -119,9 +122,7 @@ func Boot() {
 	// create a new synthetic instance
 	synthetic, err := New("src/synthetic.json")
 	if err != nil {
-		panic(
-			printRed("Failed to create bot: %v", printWhite(err)),
-		)
+		panic(printRed("Failed to create bot: %v", printWhite(err)))
 	}
 
 	// add all of the commands for the bot
@@ -136,9 +137,7 @@ func Boot() {
 	// open a new socket connection to discord
 	err = synthetic.Session.Open()
 	if err != nil {
-		panic(
-			printRed("Failed to open websocket: %v", printWhite(err)),
-		)
+		panic(printRed("Failed to open websocket: %v", printWhite(err)))
 	}
 	defer synthetic.Session.Close()
 

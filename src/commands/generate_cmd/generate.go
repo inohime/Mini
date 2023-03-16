@@ -40,7 +40,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 		URL: tags.Data["image"][0],
 	}
 
-	s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
+	_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Embeds: []*discordgo.MessageEmbed{

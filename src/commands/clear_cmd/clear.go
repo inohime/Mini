@@ -49,7 +49,7 @@ func (*ClearCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCrea
 		}
 	}
 
-	s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
+	_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: "Cleared!",

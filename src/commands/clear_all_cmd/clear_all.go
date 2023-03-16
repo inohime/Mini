@@ -17,7 +17,7 @@ func (*ClearAllCommand) Description() string {
 }
 
 func (*ClearAllCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCreate) {
-	s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
+	_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: "Carrot!",
