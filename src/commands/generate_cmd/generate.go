@@ -33,7 +33,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 
 	footerEmbed := discordgo.MessageEmbedFooter{
 		Text:    "Requested at: " + time.Now().Local().Format(time.ANSIC),
-		IconURL: "https://cdn.discordapp.com/avatars/1002274542737182871/7ffe57c0407be99b317a78a83cb7b748.png?size=1024",
+		IconURL: "https://cdn.discordapp.com/avatars/1002274542737182871/c06dd02b3f83235e3fe33e3fea72f7ef.png?size=1024",
 	}
 
 	imageEmbed := discordgo.MessageEmbedImage{
