@@ -72,7 +72,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 
 	img := acquireImgData(imgURL)
 	if img == nil {
-		s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
+		_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
 				Embeds: []*discordgo.MessageEmbed{
@@ -148,7 +148,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 		},
 	})
 	if err != nil {
-		s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
+		_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
 				Content: fmt.Sprintf("An error occured: %v", err.Error()),
