@@ -52,11 +52,19 @@ func New(filePath string) (*Synthetic, error) {
 	return &synthetic, nil
 }
 
+func hasOptions(cmd basecmd.IBaseCommand) []*discordgo.ApplicationCommandOption {
+	if extended, ok := cmd.(basecmd.IBaseCommandEx); ok {
+		return extended.Options()
+	}
+	return nil
+}
+
 func (synth *Synthetic) AddCommand(cmd basecmd.IBaseCommand) {
 	synth._intlCommands[cmd.Name()] = cmd
 	synth.Commands = append(synth.Commands, &discordgo.ApplicationCommand{
 		Name:        cmd.Name(),
 		Description: cmd.Description(),
+		Options:     hasOptions(cmd),
 	})
 }
 
@@ -115,8 +123,6 @@ func (synth *Synthetic) SetupHandlers() {
 		}
 	})
 }
-
-// make a test for searching with html elementnodes
 
 func Boot() {
 	// create a new synthetic instance

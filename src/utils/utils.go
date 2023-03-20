@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/fatih/color"
 	"golang.org/x/net/html"
 )
 
@@ -31,31 +32,50 @@ func RandomColor() int {
 
 func Request(url string) (string, error) {
 	res, err := http.Get(url)
+	if res.StatusCode != 200 {
+		return res.Status, fmt.Errorf("GET failed: %s", res.Status)
+	}
+
 	if err != nil {
-		return "", err
+		return err.Error(), err
 	}
 	defer res.Body.Close()
 
+	// redirect check (debug)
+	fmt.Println("Final URL redirect:", res.Request.URL.String())
+
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return err.Error(), err
 	}
 
 	return string(body), err
 }
 
-func FetchPageNode(url string) *html.Node {
-	base, err := Request(url) // 9660 9341 6144153
+func FetchPageNode(url string) (*html.Node, error) {
+	base, err := Request(url)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Printf(
+			color.HiRedString("Failed to parse URL: ")+"%s",
+			color.HiWhiteString(err.Error()),
+		)
+		return nil, err
 	}
 
-	doc, err := html.Parse(strings.NewReader(base))
+	doc, _ := html.Parse(strings.NewReader(base))
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Printf(
+			color.HiRedString("Failed to parse base: ")+"%s",
+			color.HiWhiteString(err.Error()),
+		)
+		return nil, err
 	}
 
-	return doc
+	return doc, nil
+}
+
+func EncodeString(tag string) string {
+	return url.QueryEscape(tag)
 }
 
 func StringsToMarkup(s []string, uri string) []string {
@@ -63,7 +83,7 @@ func StringsToMarkup(s []string, uri string) []string {
 
 	for i, tag := range s {
 		encoded := url.QueryEscape(tag)
-		markedUp[i] = fmt.Sprintf("[%s](%sposts?tags=%s&z=1)", tag, uri, encoded)
+		markedUp[i] = fmt.Sprintf("[%s](%s/posts?tags=%s&z=1)", tag, uri, encoded)
 	}
 
 	return markedUp
@@ -108,6 +128,25 @@ func searchForElement(node *html.Node, firstAttr, firstVal, secondAttr string, w
 	return content
 }
 
+func searchForChildElement(node *html.Node, parAttr, parAttrVal, chldTag, chldAttr string, wg *sync.WaitGroup) []string {
+	if node == nil {
+		log.Println("Node does not exist or is incorrect")
+		return nil
+	}
+
+	defer wg.Done()
+
+	var content []string
+
+	parentNode := findNode(node, parAttr, parAttrVal)
+	val := findValueInChildNode(parentNode, chldTag, chldAttr)
+	if val != "" {
+		content = append(content, val)
+	}
+
+	return content
+}
+
 func findNode(node *html.Node, nodeAttr, nodeVal string) *html.Node {
 	if node.Type == html.ElementNode {
 		for _, attr := range node.Attr {
@@ -139,23 +178,4 @@ func findValueInChildNode(parent *html.Node, chldTag, chldAttr string) string {
 	}
 
 	return ""
-}
-
-func searchForChildElement(node *html.Node, parAttr, parAttrVal, chldTag, chldAttr string, wg *sync.WaitGroup) []string {
-	if node == nil {
-		log.Println("Node does not exist or is incorrect")
-		return nil
-	}
-
-	defer wg.Done()
-
-	var content []string
-
-	parentNode := findNode(node, parAttr, parAttrVal)
-	val := findValueInChildNode(parentNode, chldTag, chldAttr)
-	if val != "" {
-		content = append(content, val)
-	}
-
-	return content
 }

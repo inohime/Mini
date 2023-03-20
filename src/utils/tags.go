@@ -41,7 +41,13 @@ func (t *Tags) FindImageSource() {
 func (t *Tags) FindCharacters() {
 	t.Lock()
 	defer t.Unlock()
-	t.Data["characters"] = searchForElement(t.Node, "class", "tag-type-4", "data-tag-name", &t.Sync)
+	check := searchForElement(t.Node, "class", "tag-type-4", "data-tag-name", &t.Sync)
+	if check == nil {
+		t.Data["characters"] = []string{"original"}
+		return
+	}
+
+	t.Data["characters"] = check
 }
 
 func (t *Tags) FindCopyright() {
