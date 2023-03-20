@@ -62,7 +62,10 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 	}
 
 	iconURL := "https://cdn.discordapp.com/avatars/1002274542737182871/c06dd02b3f83235e3fe33e3fea72f7ef.png?size=1024"
-	imgURL := fmt.Sprintf("%s/posts/random?tags=%s", defaultURL, utils.EncodeString(optMap["tag-1"].StringValue()))
+	imgURL := fmt.Sprintf("%s/posts/random?tags=%s",
+		defaultURL,
+		utils.EncodeString(optMap["tag-1"].StringValue()),
+	)
 
 	if opt, ok := optMap["tag-2"]; ok {
 		imgURL += fmt.Sprintf("+%s", utils.EncodeString(opt.StringValue()))
@@ -81,8 +84,11 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 						Description: "Make sure the tag(s) exist(s) and is formatted properly!\nEx.) long hair -> long_hair ✅",
 						Fields: []*discordgo.MessageEmbedField{
 							{
-								Name:  ".*･｡ﾟ*☆",
-								Value: fmt.Sprintf("Artwork by: [%s](%s) 🎀", "chromuchromu", "https://twitter.com/chromuchromu/"),
+								Name: ".*･｡ﾟ*☆",
+								Value: fmt.Sprintf("Artwork by: [%s](%s) 🎀",
+									"chromuchromu",
+									"https://twitter.com/chromuchromu/",
+								),
 							},
 						},
 						Image: &discordgo.MessageEmbedImage{
