@@ -42,7 +42,10 @@ func Request(url string) (string, error) {
 	defer res.Body.Close()
 
 	// redirect check (debug)
-	fmt.Println("Final URL redirect:", res.Request.URL.String())
+	log.Println(
+		color.HiGreenString("URL redirect:"),
+		color.HiWhiteString(res.Request.URL.String()),
+	)
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {

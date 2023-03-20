@@ -3,11 +3,13 @@ package generatecmd
 import (
 	"fmt"
 	"log"
+	basecmd "main/src/commands"
 	"main/src/utils"
 	"strings"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/fatih/color"
 )
 
 type GenerateCommand struct{}
@@ -48,12 +50,7 @@ func (*GenerateCommand) Options() []*discordgo.ApplicationCommandOption {
 }
 
 func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCreate) {
-	iopts := ic.ApplicationCommandData().Options
-	optMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(iopts))
-
-	for _, opt := range iopts {
-		optMap[opt.Name] = opt
-	}
+	optMap := basecmd.ComposeOptions(ic)
 
 	defaultURL := "https://safebooru.donmai.us"
 
@@ -61,7 +58,6 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 		defaultURL = "https://danbooru.donmai.us"
 	}
 
-	iconURL := "https://cdn.discordapp.com/avatars/1002274542737182871/c06dd02b3f83235e3fe33e3fea72f7ef.png?size=1024"
 	imgURL := fmt.Sprintf("%s/posts/random?tags=%s",
 		defaultURL,
 		utils.EncodeString(optMap["tag-1"].StringValue()),
@@ -71,39 +67,22 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 		imgURL += fmt.Sprintf("+%s", utils.EncodeString(opt.StringValue()))
 	}
 
-	log.Println("the url requested:", imgURL)
+	log.Println(
+		basecmd.PrintCyan("%s#%s %s %s",
+			ic.Member.User.Username,
+			ic.Member.User.Discriminator,
+			color.HiWhiteString("requested url:"),
+			imgURL,
+		),
+	)
 
 	img := acquireImgData(imgURL)
 	if img == nil {
-		_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Embeds: []*discordgo.MessageEmbed{
-					{
-						Title:       "Error finding image!",
-						Description: "Make sure the tag(s) exist(s) and is formatted properly!\nEx.) long hair -> long_hair ✅",
-						Fields: []*discordgo.MessageEmbedField{
-							{
-								Name: ".*･｡ﾟ*☆",
-								Value: fmt.Sprintf("Artwork by: [%s](%s) 🎀",
-									"chromuchromu",
-									"https://twitter.com/chromuchromu/",
-								),
-							},
-						},
-						Image: &discordgo.MessageEmbedImage{
-							URL: "https://pbs.twimg.com/media/FZ8WhlkXkAAug7p?format=png&name=large",
-						},
-						Footer: &discordgo.MessageEmbedFooter{
-							Text:    fmt.Sprintf("<t:%v>", time.Now().Unix()),
-							IconURL: iconURL,
-						},
-					},
-				},
-				AllowedMentions: &discordgo.MessageAllowedMentions{},
-			},
-		})
-
+		basecmd.ThrowInteractionError(
+			s, ic,
+			"Error finding image!",
+			"Make sure the tag(s) exist(s) and is formatted properly!\nEx.) long hair -> long_hair ✅",
+		)
 		return
 	}
 
@@ -144,8 +123,8 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 						},
 					},
 					Footer: &discordgo.MessageEmbedFooter{
-						Text:    fmt.Sprintf("%v requested", ic.Member.User.Username),
-						IconURL: iconURL,
+						Text:    fmt.Sprintf("Requested by %s", ic.Member.User.Username),
+						IconURL: basecmd.IconURL,
 					},
 					Timestamp: fmt.Sprint(time.Now().Format(time.RFC3339)),
 				},
@@ -157,7 +136,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 		_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("An error occured: %v", err.Error()),
+				Content: fmt.Sprintf("An error occured: %s", err.Error()),
 			},
 		})
 	}

@@ -5,10 +5,15 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/fatih/color"
 )
 
 var (
-	IconURL = "https://cdn.discordapp.com/avatars/1002274542737182871/c06dd02b3f83235e3fe33e3fea72f7ef.png?size=1024"
+	IconURL    = "https://cdn.discordapp.com/avatars/1002274542737182871/c06dd02b3f83235e3fe33e3fea72f7ef.png?size=1024"
+	PrintGreen = color.New(color.FgHiGreen).SprintfFunc()
+	PrintCyan  = color.New(color.FgHiCyan).SprintfFunc()
+	PrintRed   = color.New(color.FgHiRed).SprintfFunc()
+	PrintWhite = color.New(color.FgHiWhite).SprintFunc()
 )
 
 type IBaseCommand interface {
