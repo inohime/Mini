@@ -17,11 +17,6 @@ import (
 	"github.com/fatih/color"
 )
 
-var (
-	printRed   = color.New(color.FgHiRed).SprintfFunc()
-	printWhite = color.New(color.FgHiWhite).SprintFunc()
-)
-
 type Synthetic struct {
 	Name          string `json:"name"`
 	Token         string `json:"token"`
@@ -33,20 +28,20 @@ type Synthetic struct {
 func New(filePath string) (*Synthetic, error) {
 	bytes, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, fmt.Errorf(printWhite(err))
+		return nil, fmt.Errorf(basecmd.PrintWhite(err))
 	}
 
 	var synthetic Synthetic
 
 	err = json.Unmarshal(bytes, &synthetic)
 	if err != nil {
-		return nil, fmt.Errorf(printWhite(err))
+		return nil, fmt.Errorf(basecmd.PrintWhite(err))
 	}
 
 	synthetic._intlCommands = make(map[string]basecmd.IBaseCommand)
 	synthetic.Session, err = discordgo.New("Bot " + synthetic.Token)
 	if err != nil {
-		return nil, fmt.Errorf(printWhite(err))
+		return nil, fmt.Errorf(basecmd.PrintWhite(err))
 	}
 
 	return &synthetic, nil
@@ -74,10 +69,10 @@ func (synth *Synthetic) BindCommands() {
 		handle, err := synth.Session.ApplicationCommandCreate(synth.Session.State.User.ID, "", cmd)
 		if err != nil {
 			panic(
-				printRed(
+				basecmd.PrintRed(
 					"Failed to create %v%v%v: %v",
-					printRed("["), printWhite(cmd.Name), printRed("]"),
-					printWhite(err),
+					basecmd.PrintRed("["), basecmd.PrintWhite(cmd.Name), basecmd.PrintRed("]"),
+					basecmd.PrintWhite(err),
 				),
 			)
 		}
@@ -92,10 +87,10 @@ func (synth *Synthetic) UnbindCommands() {
 		err := synth.Session.ApplicationCommandDelete(synth.Session.State.User.ID, "", cmd.ID)
 		if err != nil {
 			panic(
-				printRed(
+				basecmd.PrintRed(
 					"Failed to delete %v%v%v: %v",
-					printRed("["), printWhite(cmd.Name), printRed("]"),
-					printWhite(err),
+					basecmd.PrintRed("["), basecmd.PrintWhite(cmd.Name), basecmd.PrintRed("]"),
+					basecmd.PrintWhite(err),
 				),
 			)
 		}
@@ -111,15 +106,16 @@ func (synth *Synthetic) SetupHandlers() {
 		}
 	})
 	synth.Session.AddHandler(func(s *discordgo.Session, ready *discordgo.Ready) {
-		log.Printf(
-			"%v#%v %v",
-			synth.Session.State.User.Username,
-			synth.Session.State.User.Discriminator,
-			color.HiGreenString("logged in"),
+		log.Println(
+			basecmd.PrintCyan("%s#%s %s",
+				synth.Session.State.User.Username,
+				synth.Session.State.User.Discriminator,
+				color.HiGreenString("logged in"),
+			),
 		)
 		err := synth.Session.UpdateListeningStatus("your requests~!")
 		if err != nil {
-			log.Println(printRed("Failed to update status:%s", printWhite(err)))
+			log.Println(basecmd.PrintRed("Failed to update status:%s", basecmd.PrintWhite(err)))
 		}
 	})
 }
@@ -128,7 +124,7 @@ func Boot() {
 	// create a new synthetic instance
 	synthetic, err := New("src/synthetic.json")
 	if err != nil {
-		panic(printRed("Failed to create bot: %v", printWhite(err)))
+		panic(basecmd.PrintRed("Failed to create bot: %v", basecmd.PrintWhite(err)))
 	}
 
 	// add all of the commands for the bot
@@ -143,7 +139,7 @@ func Boot() {
 	// open a new socket connection to discord
 	err = synthetic.Session.Open()
 	if err != nil {
-		panic(printRed("Failed to open websocket: %v", printWhite(err)))
+		panic(basecmd.PrintRed("Failed to open websocket: %v", basecmd.PrintWhite(err)))
 	}
 	defer synthetic.Session.Close()
 
