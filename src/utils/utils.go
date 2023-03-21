@@ -33,7 +33,7 @@ func RandomColor() int {
 func Request(url string) (string, error) {
 	res, err := http.Get(url)
 	if res.StatusCode != 200 {
-		return res.Status, fmt.Errorf("GET failed: %s", res.Status)
+		return res.Status, fmt.Errorf(res.Status)
 	}
 
 	if err != nil {
