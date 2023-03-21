@@ -3,7 +3,7 @@ package clearcmd
 import (
 	"fmt"
 	"log"
-	basecmd "main/src/commands"
+	base "main/src/ops"
 	"main/src/utils"
 	"time"
 
@@ -37,12 +37,12 @@ func (*ClearCommand) Options() []*discordgo.ApplicationCommandOption {
 
 func (*ClearCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCreate) {
 	// overkill since there is only one option but more readable
-	optMap := basecmd.ComposeOptions(ic)
+	optMap := base.ComposeOptions(ic)
 	channel := optMap["channel"].ChannelValue(s).ID
 
 	userPerms := ic.Member.Permissions
 	if userPerms&discordgo.PermissionAdministrator == 0 {
-		basecmd.ThrowInteractionError(
+		base.ThrowInteractionError(
 			s, ic,
 			"Missing Permissions!",
 			"Make sure you have elevated permissions to use this command",
@@ -84,7 +84,7 @@ func (*ClearCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCrea
 					Description: "Cleared! ✅",
 					Footer: &discordgo.MessageEmbedFooter{
 						Text:    fmt.Sprintf("Requested by %s", ic.Member.User.Username),
-						IconURL: basecmd.IconURL,
+						IconURL: base.IconURL,
 					},
 					Timestamp: fmt.Sprint(time.Now().Format(time.RFC3339)),
 				},

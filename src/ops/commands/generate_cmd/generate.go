@@ -3,7 +3,7 @@ package generatecmd
 import (
 	"fmt"
 	"log"
-	basecmd "main/src/commands"
+	base "main/src/ops"
 	"main/src/utils"
 	"strings"
 	"time"
@@ -50,7 +50,7 @@ func (*GenerateCommand) Options() []*discordgo.ApplicationCommandOption {
 }
 
 func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCreate) {
-	optMap := basecmd.ComposeOptions(ic)
+	optMap := base.ComposeOptions(ic)
 
 	defaultURL := "https://safebooru.donmai.us"
 
@@ -68,7 +68,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 	}
 
 	log.Println(
-		basecmd.PrintCyan("%s#%s %s %s",
+		base.PrintCyan("%s#%s %s %s",
 			ic.Member.User.Username,
 			ic.Member.User.Discriminator,
 			color.HiWhiteString("requested url:"),
@@ -78,7 +78,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 
 	img := acquireImgData(imgURL)
 	if img == nil {
-		basecmd.ThrowInteractionError(
+		base.ThrowInteractionError(
 			s, ic,
 			"Error finding image!",
 			"Make sure the tag(s) exist(s) and is formatted properly!\nEx.) long hair -> long_hair ✅",
@@ -124,7 +124,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 					},
 					Footer: &discordgo.MessageEmbedFooter{
 						Text:    fmt.Sprintf("Requested by %s", ic.Member.User.Username),
-						IconURL: basecmd.IconURL,
+						IconURL: base.IconURL,
 					},
 					Timestamp: fmt.Sprint(time.Now().Format(time.RFC3339)),
 				},

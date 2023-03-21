@@ -1,7 +1,8 @@
-package basecmd
+package base
 
 import (
 	"fmt"
+	store "main/src/utils/store"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -9,11 +10,14 @@ import (
 )
 
 var (
-	IconURL    = "https://cdn.discordapp.com/avatars/1002274542737182871/c06dd02b3f83235e3fe33e3fea72f7ef.png?size=1024"
+	IconURL = "https://cdn.discordapp.com/avatars/1002274542737182871/c06dd02b3f83235e3fe33e3fea72f7ef.png?size=1024"
+
 	PrintGreen = color.New(color.FgHiGreen).SprintfFunc()
 	PrintCyan  = color.New(color.FgHiCyan).SprintfFunc()
 	PrintRed   = color.New(color.FgHiRed).SprintfFunc()
 	PrintWhite = color.New(color.FgHiWhite).SprintFunc()
+
+	Store = store.New()
 )
 
 type IBaseCommand interface {
@@ -25,6 +29,11 @@ type IBaseCommand interface {
 type IBaseCommandEx interface {
 	IBaseCommand
 	Options() []*discordgo.ApplicationCommandOption
+}
+
+type IBaseComponent interface {
+	Name() string // used for CustomID
+	Execute(*discordgo.Session, *discordgo.InteractionCreate)
 }
 
 func ComposeOptions(ic *discordgo.InteractionCreate) map[string]*discordgo.ApplicationCommandInteractionDataOption {
@@ -65,7 +74,17 @@ func ThrowInteractionError(s *discordgo.Session, ic *discordgo.InteractionCreate
 					Timestamp: fmt.Sprint(time.Now().Format(time.RFC3339)),
 				},
 			},
-			AllowedMentions: &discordgo.MessageAllowedMentions{},
+			Flags: discordgo.MessageFlagsEphemeral,
+		},
+	})
+}
+
+func ThrowSimpleInteractionError(s *discordgo.Session, ic *discordgo.InteractionCreate, err string) {
+	_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: fmt.Sprintf("An error occurred: %s", err),
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 }
