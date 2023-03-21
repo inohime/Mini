@@ -121,7 +121,7 @@ func (c *ClearAllCommand) Execute(s *discordgo.Session, ic *discordgo.Interactio
 	}
 
 	// clear out the previous menu interaction
-	s.InteractionResponseDelete(ic.Interaction)
+	_ = s.InteractionResponseDelete(ic.Interaction)
 
 	msg, err := s.FollowupMessageCreate(ic.Interaction, true, &discordgo.WebhookParams{
 		Embeds: []*discordgo.MessageEmbed{
@@ -146,7 +146,7 @@ func (c *ClearAllCommand) Execute(s *discordgo.Session, ic *discordgo.Interactio
 
 	time.Sleep(time.Second * 15)
 
-	s.FollowupMessageDelete(ic.Interaction, msg.ID)
+	_ = s.FollowupMessageDelete(ic.Interaction, msg.ID)
 }
 
 func menuOptions(channels map[string]string) []discordgo.SelectMenuOption {
