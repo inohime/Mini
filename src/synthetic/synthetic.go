@@ -9,6 +9,7 @@ import (
 	clearallcmd "main/src/ops/commands/clear_all_cmd"
 	clearcmd "main/src/ops/commands/clear_cmd"
 	generatecmd "main/src/ops/commands/generate_cmd"
+	helpcmd "main/src/ops/commands/help_cmd"
 	clearchannelcomp "main/src/ops/components/clear_channel_comp"
 	"os"
 	"os/signal"
@@ -62,6 +63,7 @@ func Boot() {
 	synthetic.AddCommand(clearcmd.New())
 	synthetic.AddCommand(clearallcmd.New())
 	synthetic.AddCommand(generatecmd.New())
+	synthetic.AddCommand(helpcmd.New())
 
 	// add all of the components for the bot
 	synthetic.AddComponent(clearchannelcomp.New())
