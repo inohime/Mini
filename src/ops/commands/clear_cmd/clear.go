@@ -64,13 +64,18 @@ func (*ClearCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCrea
 
 	err := s.ChannelMessagesBulkDelete(channel, msgIDs)
 	if err != nil {
-		log.Println("Failed to delete all messages in this channel:", err)
+		log.Println(
+			base.PrintRed("Failed to delete all messages in this channel: %s", err),
+		)
+		return
 	}
 
 	for _, msg := range oldMsgIDs {
 		err := s.ChannelMessageDelete(msg.ChannelID, msg.ID)
 		if err != nil {
-			log.Println("Failed to delete message:", err)
+			log.Println(
+				base.PrintRed("Failed to delete message: %s", err),
+			)
 			break
 		}
 	}
@@ -92,12 +97,7 @@ func (*ClearCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCrea
 		},
 	})
 	if err != nil {
-		_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("An error has occurred: %s", err.Error()),
-			},
-		})
+		base.ThrowSimpleInteractionError(s, ic, err.Error())
 	}
 
 	time.Sleep(time.Second * 15)

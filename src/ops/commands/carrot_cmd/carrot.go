@@ -21,6 +21,7 @@ func (*CarrotCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCre
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
 			Content: "Carrot!",
+			Flags:   discordgo.MessageFlagsEphemeral,
 		},
 	})
 }

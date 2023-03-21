@@ -154,7 +154,6 @@ func menuOptions(channels map[string]string) []discordgo.SelectMenuOption {
 	for channelName, channelID := range channels {
 		opts = append(opts, discordgo.SelectMenuOption{
 			Label: channelName,
-			// optionally, switch to ToLowerSpecial to handle unicode channel names
 			Value: channelID,
 			Emoji: discordgo.ComponentEmoji{
 				Name: "🗒️",

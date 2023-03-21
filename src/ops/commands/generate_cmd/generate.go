@@ -129,16 +129,10 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 					Timestamp: fmt.Sprint(time.Now().Format(time.RFC3339)),
 				},
 			},
-			AllowedMentions: &discordgo.MessageAllowedMentions{},
 		},
 	})
 	if err != nil {
-		_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("An error occured: %s", err.Error()),
-			},
-		})
+		base.ThrowSimpleInteractionError(s, ic, err.Error())
 	}
 }
 
@@ -149,6 +143,8 @@ func acquireImgData(uri string) *utils.Tags {
 	}
 
 	tags := utils.NewTag(doc)
+
+	// optionally: make a task queue
 	// (de/in)crement based on the number of tag functions
 	numTasks := 5
 
