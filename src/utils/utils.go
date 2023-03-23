@@ -15,6 +15,32 @@ import (
 	"golang.org/x/net/html"
 )
 
+// type SafeArray struct {
+// 	sync.Mutex
+// 	_array []string
+// }
+
+type SafeMap struct {
+	sync.RWMutex
+	_map map[string]interface{}
+}
+
+func (sm *SafeMap) Read(key string) (value interface{}, ok bool) {
+	sm.RLock()
+	defer sm.RUnlock()
+
+	value, ok = sm._map[key]
+
+	return
+}
+
+func (sm *SafeMap) Write(key string, value interface{}) {
+	sm.Lock()
+	defer sm.Unlock()
+
+	sm._map[key] = value
+}
+
 func RandomColor() int {
 	rand.Seed(time.Now().UnixNano())
 
@@ -92,13 +118,70 @@ func StringsToMarkup(s []string, uri string) []string {
 	return markedUp
 }
 
-func searchForElement(node *html.Node, firstAttr, firstVal, secondAttr string, wg *sync.WaitGroup) []string {
+func EvictChars(str string) string {
+	if len(str) <= 1024 {
+		return str
+	}
+
+	for i := 0; i < len(str); i++ {
+		if i >= 1024 { // 84 words
+			str = strings.Join(
+				strings.Split(
+					str[:strings.LastIndex(str[:i], ",")], ", "),
+				", ",
+			)
+			break
+		}
+	}
+
+	return str
+}
+
+func searchForTextInElement(node *html.Node, firstAttr, firstVal string) string {
+	if node == nil {
+		log.Println("Node does not exist or is incorrect")
+		return ""
+	}
+
+	text := ""
+	var findNext func(*html.Node)
+	findNext = func(n *html.Node) {
+		if n.Type == html.ElementNode {
+			found := false
+			for _, attr := range n.Attr {
+				if attr.Key == firstAttr {
+					if strings.Contains(attr.Val, firstVal) {
+						found = true
+						break
+					}
+				}
+			}
+
+			if found {
+				for c := n.FirstChild; c != nil; c = c.NextSibling {
+					if c.Type == html.TextNode {
+						text = c.Data
+						break
+					}
+				}
+			}
+		}
+
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			findNext(c)
+		}
+	}
+
+	findNext(node)
+
+	return text
+}
+
+func searchForElement(node *html.Node, firstAttr, firstVal, secondAttr string) []string {
 	if node == nil {
 		log.Println("Node does not exist or is incorrect")
 		return nil
 	}
-
-	defer wg.Done()
 
 	var content []string
 	var findNext func(*html.Node)
@@ -131,13 +214,13 @@ func searchForElement(node *html.Node, firstAttr, firstVal, secondAttr string, w
 	return content
 }
 
-func searchForChildElement(node *html.Node, parAttr, parAttrVal, chldTag, chldAttr string, wg *sync.WaitGroup) []string {
+func searchForChildElement(node *html.Node, parAttr, parAttrVal, chldTag, chldAttr string) []string {
 	if node == nil {
 		log.Println("Node does not exist or is incorrect")
 		return nil
 	}
 
-	defer wg.Done()
+	// defer wg.Done()
 
 	var content []string
 

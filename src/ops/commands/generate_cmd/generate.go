@@ -6,6 +6,7 @@ import (
 	base "main/src/ops"
 	"main/src/utils"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -86,13 +87,19 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 		return
 	}
 
-	generalTags := strings.Join(img.Data["general"][:], ", ")
+	gtr, _ := img.Data.Read("general")
+	generalTags := utils.EvictChars(strings.Join(gtr.([]string), ", "))
 
-	markedChars := utils.StringsToMarkup(img.Data["characters"], defaultURL)
-	charTags := strings.Join(markedChars[:], ", ")
+	ctr, _ := img.Data.Read("characters")
+	markedChars := utils.StringsToMarkup(ctr.([]string), defaultURL)
+	charTags := utils.EvictChars(strings.Join(markedChars, ", "))
 
-	markedArtists := utils.StringsToMarkup(img.Data["artist"], defaultURL)
-	artistTags := strings.Join(markedArtists[:], ", ")
+	atr, _ := img.Data.Read("artist")
+	markedArtists := utils.StringsToMarkup(atr.([]string), defaultURL)
+	artistTags := utils.EvictChars(strings.Join(markedArtists, ", "))
+
+	image, _ := img.Data.Read("image")
+	imgSrc, _ := img.Data.Read("imgsrc")
 
 	err := s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -101,7 +108,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 				{
 					Title: "Recommendation for " + ic.Member.User.Username,
 					Image: &discordgo.MessageEmbedImage{
-						URL: img.Data["image"][0],
+						URL: image.([]string)[0],
 					},
 					Color: utils.RandomColor(),
 					Fields: []*discordgo.MessageEmbedField{
@@ -119,7 +126,7 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 						},
 						{
 							Name:  "Source",
-							Value: img.Data["imgsrc"][0],
+							Value: imgSrc.([]string)[0],
 						},
 					},
 					Footer: &discordgo.MessageEmbedFooter{
@@ -139,22 +146,30 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 func acquireImgData(uri string) *utils.Tags {
 	doc, err := utils.FetchPageNode(uri)
 	if err != nil {
+		log.Println(
+			base.PrintRed(
+				"Failed to fetch node from page: %s",
+				base.PrintWhite(err.Error()),
+			),
+		)
 		return nil
 	}
 
 	tags := utils.NewTag(doc)
+	if tags == nil {
+		log.Println(base.PrintRed("Failed to create new tag object"))
+		return nil
+	}
 
-	// optionally: make a task queue
-	// (de/in)crement based on the number of tag functions
-	numTasks := 5
+	var swg sync.WaitGroup
 
-	tags.Sync.Add(numTasks)
-	go tags.FindArtistName()
-	go tags.FindGeneralTags()
-	go tags.FindImageUrl()
-	go tags.FindImageSource()
-	go tags.FindCharacters()
-	tags.Sync.Wait()
+	swg.Add(5)
+	go tags.FindArtistName(&swg)
+	go tags.FindGeneralTags(&swg)
+	go tags.FindImageUrl(&swg)
+	go tags.FindImageSource(&swg)
+	go tags.FindCharacters(&swg)
+	swg.Wait()
 
 	return tags
 }
