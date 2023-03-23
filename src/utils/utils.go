@@ -15,11 +15,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-// type SafeArray struct {
-// 	sync.Mutex
-// 	_array []string
-// }
-
 type SafeMap struct {
 	sync.RWMutex
 	_map map[string]interface{}
@@ -219,8 +214,6 @@ func searchForChildElement(node *html.Node, parAttr, parAttrVal, chldTag, chldAt
 		log.Println("Node does not exist or is incorrect")
 		return nil
 	}
-
-	// defer wg.Done()
 
 	var content []string
 
