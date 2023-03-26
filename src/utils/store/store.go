@@ -1,16 +1,17 @@
 package store
 
+import "main/src/utils"
+
 // simple shared store
-// not intended to be used in goroutines
 
 type Store struct {
-	_contents  map[string]interface{}
+	_contents  utils.SafeMap
 	_menuState bool
 }
 
 func New() *Store {
 	return &Store{
-		_contents:  make(map[string]interface{}),
+		_contents:  utils.NewSafeMap(),
 		_menuState: false,
 	}
 }
@@ -21,14 +22,22 @@ func New() *Store {
 //	- (Format) --{package name acronym + comp/cmd}-{description of the item}
 //	- (Example) --cccomp-channelIDs -> clearchannelcomp-channelIDs
 func (s *Store) Bundle(item interface{}, itemName string) {
-	s._contents[itemName] = item
+	s._contents.Write(itemName, item)
 }
 
 // Retrieve items from the resource store
 //
 // itemName is the name of the item given to bundle
-func (s *Store) Acquire(itemName string) interface{} {
-	return s._contents[itemName]
+func (s *Store) Acquire(itemName string) (data interface{}) {
+	data, _ = s._contents.Read(itemName)
+	return
+}
+
+// Remove items from the resource store
+//
+// itemName is the name of the item given to bundle
+func (s *Store) Release(itemName string) {
+	s._contents.Release(itemName)
 }
 
 // Modify the menu state

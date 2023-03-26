@@ -8,34 +8,17 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/fatih/color"
 	"golang.org/x/net/html"
 )
 
-type SafeMap struct {
-	sync.RWMutex
-	_map map[string]interface{}
-}
-
-func (sm *SafeMap) Read(key string) (value interface{}, ok bool) {
-	sm.RLock()
-	defer sm.RUnlock()
-
-	value, ok = sm._map[key]
-
-	return
-}
-
-func (sm *SafeMap) Write(key string, value interface{}) {
-	sm.Lock()
-	defer sm.Unlock()
-
-	sm._map[key] = value
-}
-
+// Generates a random colour
+//
+// Sets the colour for interaction messages!
+//
+// Returns a random int containing the value of a pre-defined colour
 func RandomColor() int {
 	rand.Seed(time.Now().UnixNano())
 
@@ -76,6 +59,9 @@ func Request(url string) (string, error) {
 	return string(body), err
 }
 
+// Attempts to get the document node for the page
+//
+// Returns the document node for the requested page and nil if found, otherwise nil and an error
 func FetchPageNode(url string) (*html.Node, error) {
 	base, err := Request(url)
 	if err != nil {
@@ -98,10 +84,20 @@ func FetchPageNode(url string) (*html.Node, error) {
 	return doc, nil
 }
 
+// URL encoder for tags
+//
+// Example: ( :D -> %3AD )
+//
+// Returns a URL query encoded string
 func EncodeString(tag string) string {
 	return url.QueryEscape(tag)
 }
 
+// Formats a URLs to a booru clickable link
+//
+// URI can be either safe/danbooru
+//
+// Returns a array of strings formatted to a markup link
 func StringsToMarkup(s []string, uri string) []string {
 	markedUp := make([]string, len(s))
 
@@ -113,6 +109,14 @@ func StringsToMarkup(s []string, uri string) []string {
 	return markedUp
 }
 
+// String Eviction
+//
+// Finds the last comma before/after a word
+// that is within the 1024 character count
+//
+// # Every other character after that comma is evicted from the string
+//
+// Returns a string with evicted characters if its length was longer than 1024
 func EvictChars(str string) string {
 	if len(str) <= 1024 {
 		return str

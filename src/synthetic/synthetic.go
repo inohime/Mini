@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"log"
 	base "main/src/ops"
+
 	carrotcmd "main/src/ops/commands/carrot_cmd"
 	clearallcmd "main/src/ops/commands/clear_all_cmd"
 	clearcmd "main/src/ops/commands/clear_cmd"
 	generatecmd "main/src/ops/commands/generate_cmd"
 	helpcmd "main/src/ops/commands/help_cmd"
+	tagscmd "main/src/ops/commands/tags_cmd"
 	clearchannelcomp "main/src/ops/components/clear_channel_comp"
+	viewscomp "main/src/ops/components/views_comp"
 	"os"
 	"os/signal"
 	"syscall"
@@ -64,9 +67,12 @@ func Boot() {
 	synthetic.AddCommand(clearallcmd.New())
 	synthetic.AddCommand(generatecmd.New())
 	synthetic.AddCommand(helpcmd.New())
+	synthetic.AddCommand(tagscmd.New())
 
 	// add all of the components for the bot
 	synthetic.AddComponent(clearchannelcomp.New())
+	synthetic.AddComponent(viewscomp.NewViewLeft())
+	synthetic.AddComponent(viewscomp.NewViewRight())
 
 	// create and setup handlers
 	synthetic.SetupHandlers()

@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
 	"sync"
 
 	"golang.org/x/net/html"
@@ -14,7 +16,7 @@ type Tags struct {
 
 func NewTag(node *html.Node) *Tags {
 	return &Tags{
-		Data: SafeMap{_map: make(map[string]interface{}, 6)},
+		Data: NewSafeMap(),
 		Node: node,
 	}
 }
@@ -99,4 +101,29 @@ func (t *Tags) FindGeneralTags(swg *sync.WaitGroup) {
 	}
 
 	t.Data.Write("general", check)
+}
+
+func MakeTagsTable(s []string, length *int) string {
+	var tags strings.Builder
+
+	sliceLen := 10
+	if len(s) < 10 {
+		sliceLen = len(s)
+	}
+
+	for _, tag := range s[:sliceLen] {
+		if len(tag) > *length {
+			*length = len(tag)
+		}
+	}
+
+	for _, tag := range s[:sliceLen] {
+		tags.WriteString(
+			fmt.Sprintf(
+				"%[2]*[1]s\n", tag, (*length+len(tag))/2,
+			),
+		)
+	}
+
+	return tags.String()
 }
