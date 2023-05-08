@@ -24,7 +24,7 @@ func (*HelpCommand) Name() string {
 }
 
 func (*HelpCommand) Description() string {
-	return "Purges all messages in every channel"
+	return "Lists all commands available"
 }
 
 func init() {
