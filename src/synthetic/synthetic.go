@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	base "main/src/ops"
+	"os"
+	"os/signal"
+	"syscall"
 
+	base "main/src/ops"
 	carrotcmd "main/src/ops/commands/carrot_cmd"
 	clearallcmd "main/src/ops/commands/clear_all_cmd"
 	clearcmd "main/src/ops/commands/clear_cmd"
@@ -14,9 +17,6 @@ import (
 	tagscmd "main/src/ops/commands/tags_cmd"
 	clearchannelcomp "main/src/ops/components/clear_channel_comp"
 	viewscomp "main/src/ops/components/views_comp"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/fatih/color"
