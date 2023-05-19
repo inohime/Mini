@@ -57,7 +57,11 @@ func Boot() {
 		panic(base.PrintRed("Failed to create AWS S3 Client: %s", base.PrintWhite(err)))
 	}
 
-	config, err := awsynthetic.New(s3Client, "SN_AWS_BUCKET_NAME", "SN_AWS_OBJECT_KEY")
+	config, err := awsynthetic.New(
+		s3Client,
+		os.Getenv("SN_AWS_BUCKET_NAME"),
+		os.Getenv("SN_AWS_OBJECT_KEY"),
+	)
 	if err != nil {
 		panic(base.PrintRed("Failed to acquire resource from AWS: %s", base.PrintWhite(err)))
 	}
