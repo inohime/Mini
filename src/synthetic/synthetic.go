@@ -17,6 +17,7 @@ import (
 	tagscmd "main/src/ops/commands/tags_cmd"
 	clearchannelcomp "main/src/ops/components/clear_channel_comp"
 	viewscomp "main/src/ops/components/views_comp"
+	awsynthetic "main/third-party/awsynthetic"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/fatih/color"
@@ -31,15 +32,34 @@ type Synthetic struct {
 	_intlComponents map[string]base.IBaseComponent
 }
 
-func New(filePath string) (*Synthetic, error) {
-	bytes, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf(base.PrintWhite(err))
-	}
+// func New(filePath string) (*Synthetic, error) {
+// 	bytes, err := os.ReadFile(filePath)
+// 	if err != nil {
+// 		return nil, fmt.Errorf(base.PrintWhite(err))
+// 	}
 
+// 	var synthetic Synthetic
+
+// 	err = json.Unmarshal(bytes, &synthetic)
+// 	if err != nil {
+// 		return nil, fmt.Errorf(base.PrintWhite(err))
+// 	}
+
+// 	synthetic._intlCommands = make(map[string]base.IBaseCommand)
+// 	synthetic._intlComponents = make(map[string]base.IBaseComponent)
+
+// 	synthetic.Session, err = discordgo.New("Bot " + synthetic.Token)
+// 	if err != nil {
+// 		return nil, fmt.Errorf(base.PrintWhite(err))
+// 	}
+
+// 	return &synthetic, nil
+// }
+
+func New(fileContent []byte) (*Synthetic, error) {
 	var synthetic Synthetic
 
-	err = json.Unmarshal(bytes, &synthetic)
+	err := json.Unmarshal(fileContent, &synthetic)
 	if err != nil {
 		return nil, fmt.Errorf(base.PrintWhite(err))
 	}
@@ -56,8 +76,17 @@ func New(filePath string) (*Synthetic, error) {
 }
 
 func Boot() {
-	// create a new synthetic instance
-	synthetic, err := New("src/synthetic.json")
+	s3Client, err := awsynthetic.NewS3Client("us-west-1")
+	if err != nil {
+		panic(base.PrintRed("Failed to create AWS S3 Client: %s", base.PrintWhite(err)))
+	}
+
+	config, err := awsynthetic.New(s3Client, "SN_AWS_BUCKET_NAME", "SN_AWS_OBJECT_KEY")
+	if err != nil {
+		panic(base.PrintRed("Failed to acquire resource from AWS: %s", base.PrintWhite(err)))
+	}
+
+	synthetic, err := New(config)
 	if err != nil {
 		panic(base.PrintRed("Failed to create bot: %s", base.PrintWhite(err)))
 	}
