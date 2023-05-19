@@ -52,18 +52,13 @@ func New(fileContent []byte) (*Synthetic, error) {
 }
 
 func Boot() {
-	s3Client, err := awsynthetic.NewS3Client("us-west-1")
-	if err != nil {
-		panic(base.PrintRed("Failed to create AWS S3 Client: %s", base.PrintWhite(err)))
-	}
-
 	config, err := awsynthetic.New(
-		s3Client,
+		"us-west-1",
 		os.Getenv("SN_AWS_BUCKET_NAME"),
 		os.Getenv("SN_AWS_OBJECT_KEY"),
 	)
 	if err != nil {
-		panic(base.PrintRed("Failed to acquire resource from AWS: %s", base.PrintWhite(err)))
+		panic(base.PrintRed("Failed to create AWS S3 Client: %s", base.PrintWhite(err)))
 	}
 
 	synthetic, err := New(config)

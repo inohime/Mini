@@ -9,7 +9,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-func New(client *s3.Client, bucketName, objKey string) ([]byte, error) {
+func New(region, bucketName, objKey string) ([]byte, error) {
+	client, err := newS3Client(region)
+	if err != nil {
+		return nil, err
+	}
+
 	res, err := client.GetObject(context.Background(), &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key:    aws.String(objKey),
@@ -28,7 +33,7 @@ func New(client *s3.Client, bucketName, objKey string) ([]byte, error) {
 	return body, nil
 }
 
-func NewS3Client(region string) (client *s3.Client, err error) {
+func newS3Client(region string) (client *s3.Client, err error) {
 	sdkConfig, err := config.LoadDefaultConfig(
 		context.Background(),
 		config.WithRegion(region),
