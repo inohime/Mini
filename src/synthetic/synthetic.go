@@ -32,30 +32,6 @@ type Synthetic struct {
 	_intlComponents map[string]base.IBaseComponent
 }
 
-// func New(filePath string) (*Synthetic, error) {
-// 	bytes, err := os.ReadFile(filePath)
-// 	if err != nil {
-// 		return nil, fmt.Errorf(base.PrintWhite(err))
-// 	}
-
-// 	var synthetic Synthetic
-
-// 	err = json.Unmarshal(bytes, &synthetic)
-// 	if err != nil {
-// 		return nil, fmt.Errorf(base.PrintWhite(err))
-// 	}
-
-// 	synthetic._intlCommands = make(map[string]base.IBaseCommand)
-// 	synthetic._intlComponents = make(map[string]base.IBaseComponent)
-
-// 	synthetic.Session, err = discordgo.New("Bot " + synthetic.Token)
-// 	if err != nil {
-// 		return nil, fmt.Errorf(base.PrintWhite(err))
-// 	}
-
-// 	return &synthetic, nil
-// }
-
 func New(fileContent []byte) (*Synthetic, error) {
 	var synthetic Synthetic
 
