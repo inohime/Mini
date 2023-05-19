@@ -4,4 +4,4 @@ src/synthetic.json
 test_tags.json
 .vscode/
 booru_auth.json
-set_of_tags.json
+build/
