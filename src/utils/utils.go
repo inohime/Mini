@@ -67,10 +67,6 @@ func Request(url string) (string, error) {
 	return string(body), err
 }
 
-// Attempts to get the document node for the page
-//
-// Returns the document node for the requested page and nil if found, otherwise nil and an error
-
 // FetchPageNode is a helper function that attempts to get the document node for a page
 //
 // Params:
