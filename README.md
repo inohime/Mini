@@ -3,13 +3,19 @@
 	<h1 align="center">Mini</h1>
 </p>
 <p align="center">A booru-based pseudo-random image generator discord bot</p>
-
+</br>
+<!-- <img src="https://img.shields.io/badge/railway build--blue?style=flat" alt="CI Status Workflow Badge" /> -->
+<div align="center">
+	<img src="https://img.shields.io/github/license/inohime/Mini" alt="License" />
+	<img src="https://img.shields.io/github/go-mod/go-version/inohime/Mini" alt="Golang version" />
+</div>
+	
 ## Example
 <div>
     <p>Using generate command </p>
-    <img width="150" src="./assets/example-generate.png" alt="Mini Banner" />
+    <img width="150" src="./assets/example-generate.png" alt="generate command example showcase 1" />
     </br>
-    <img width="150" src="./assets/example-generate-2.png" alt="Mini Banner" />
+    <img width="150" src="./assets/example-generate-2.png" alt="generate command example showcase 1" />
 </div>
 
 ## Features
