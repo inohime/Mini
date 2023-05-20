@@ -8,6 +8,7 @@
 <div>
     <p>Using generate command </p>
     <img width="150" src="./assets/example-generate.png" alt="Mini Banner" />
+    </br>
     <img width="150" src="./assets/example-generate-2.png" alt="Mini Banner" />
 </div>
 
@@ -24,4 +25,4 @@ Whilst the main feature is `Generate` which suggests a random picture, there are
 	- `Help`: Lists all commands available
 
 ## Acknowledgements
-Artwork by ![🎀ChromuChromu🎀](https://twitter.com/chromuchromu/)
+Artwork by <a href="https://twitter.com/chromuchromu/">🎀ChromuChromu🎀</a>
