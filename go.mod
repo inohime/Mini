@@ -3,7 +3,7 @@ module main
 go 1.19
 
 require (
-	github.com/bwmarrin/discordgo v0.26.1
+	github.com/bwmarrin/discordgo v0.27.1
 	github.com/fatih/color v1.15.0
 )
 
