@@ -5,6 +5,7 @@ import (
 	"log"
 	base "main/src/ops"
 	"main/src/utils"
+	"main/src/utils/embed"
 	"strings"
 	"sync"
 	"time"
@@ -101,46 +102,19 @@ func (*GenerateCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionC
 	image, _ := img.Data.Read("image")
 	imgSrc, _ := img.Data.Read("imgsrc")
 
-	err := s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title: "Recommendation for " + ic.Member.User.Username,
-					Image: &discordgo.MessageEmbedImage{
-						URL: image.([]string)[0],
-					},
-					Color: utils.RandomColor(),
-					Fields: []*discordgo.MessageEmbedField{
-						{
-							Name:  "Artist",
-							Value: artistTags,
-						},
-						{
-							Name:  "Tags",
-							Value: generalTags,
-						},
-						{
-							Name:  "Character(s)",
-							Value: charTags,
-						},
-						{
-							Name:  "Source",
-							Value: imgSrc.([]string)[0],
-						},
-					},
-					Footer: &discordgo.MessageEmbedFooter{
-						Text:    fmt.Sprintf("Requested by %s", ic.Member.User.Username),
-						IconURL: base.IconURL,
-					},
-					Timestamp: fmt.Sprint(time.Now().Format(time.RFC3339)),
-				},
-			},
-		},
-	})
-	if err != nil {
-		base.ThrowSimpleInteractionError(s, ic, err.Error())
-	}
+	genMsgEmbed := embed.New(false).
+		SetTitle("Recommendation for "+ic.Member.User.Username).
+		SetImage(image.([]string)[0]).
+		SetColor(utils.RandomColor()).
+		SetField("Artist", artistTags, false).
+		SetField("Tags", generalTags, false).
+		SetField("Character(s)", charTags, false).
+		SetField("Source", imgSrc.([]string)[0], false).
+		SetFooter(fmt.Sprintf("Requested by %s", ic.Member.User.Username), base.IconURL).
+		SetTimestamp(fmt.Sprint(time.Now().Format(time.RFC3339))).
+		Bind()
+
+	genMsgEmbed.Use(genMsgEmbed.DeferredResponse, s, ic).With(base.ThrowSimpleInteractionError)
 }
 
 func acquireImgData(uri string) *utils.Tags {

@@ -5,6 +5,7 @@ import (
 	"log"
 	base "main/src/ops"
 	"main/src/utils"
+	"main/src/utils/embed"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -80,27 +81,16 @@ func (*ClearCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCrea
 		}
 	}
 
-	err = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Color:       utils.RandomColor(),
-					Description: "Cleared! ✅",
-					Footer: &discordgo.MessageEmbedFooter{
-						Text:    fmt.Sprintf("Requested by %s", ic.Member.User.Username),
-						IconURL: base.IconURL,
-					},
-					Timestamp: fmt.Sprint(time.Now().Format(time.RFC3339)),
-				},
-			},
-		},
-	})
-	if err != nil {
-		base.ThrowSimpleInteractionError(s, ic, err.Error())
-	}
+	clearMsgEmbed := embed.New(false).
+		SetColor(utils.RandomColor()).
+		SetDescription("Cleared! ✅").
+		SetFooter(fmt.Sprintf("Requested by %s", ic.Member.User.Username), base.IconURL).
+		SetTimestamp(fmt.Sprint(time.Now().Format(time.RFC3339))).
+		Bind()
+
+	clearMsgEmbed.Use(clearMsgEmbed.Response, s, ic).With(base.ThrowSimpleInteractionError)
 
 	time.Sleep(time.Second * 15)
 
-	_ = s.InteractionResponseDelete(ic.Interaction)
+	clearMsgEmbed.Use(clearMsgEmbed.ResponseDelete, s, ic)
 }

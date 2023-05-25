@@ -4,6 +4,7 @@ import (
 	"fmt"
 	base "main/src/ops"
 	"main/src/utils"
+	"main/src/utils/embed"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -51,27 +52,15 @@ func init() {
 }
 
 func (c *HelpCommand) Execute(s *discordgo.Session, ic *discordgo.InteractionCreate) {
-	err := s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title:  "Table of Commands",
-					Color:  utils.RandomColor(),
-					Fields: commands,
-					Footer: &discordgo.MessageEmbedFooter{
-						Text:    fmt.Sprintf("Requested by %s", ic.Member.User.Username),
-						IconURL: base.IconURL,
-					},
-					Timestamp: fmt.Sprint(time.Now().Format(time.RFC3339)),
-				},
-			},
-			Flags: discordgo.MessageFlagsEphemeral,
-		},
-	})
-	if err != nil {
-		base.ThrowSimpleInteractionError(s, ic, err.Error())
-	}
+	helpMsgEmbed := embed.New(true).
+		SetTitle("Table of Commands").
+		SetColor(utils.RandomColor()).
+		SetFieldEx(commands...).
+		SetFooter(fmt.Sprintf("Requested by %s", ic.Member.User.Username), base.IconURL).
+		SetTimestamp(fmt.Sprint(time.Now().Format(time.RFC3339))).
+		Bind()
+
+	helpMsgEmbed.Use(helpMsgEmbed.Response, s, ic).With(base.ThrowSimpleInteractionError)
 }
 
 func addCommandToList(name, usage string) {

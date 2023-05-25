@@ -2,6 +2,7 @@ package base
 
 import (
 	"fmt"
+	"main/src/utils/embed"
 	store "main/src/utils/store"
 	"time"
 
@@ -48,35 +49,24 @@ func ComposeOptions(ic *discordgo.InteractionCreate) map[string]*discordgo.Appli
 }
 
 func ThrowInteractionError(s *discordgo.Session, ic *discordgo.InteractionCreate, title, desc string) {
-	_ = s.InteractionRespond(ic.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Embeds: []*discordgo.MessageEmbed{
-				{
-					Title:       title,
-					Description: desc,
-					Fields: []*discordgo.MessageEmbedField{
-						{
-							Name: ".*･｡ﾟ*☆",
-							Value: fmt.Sprintf("Artwork by: [%s](%s) 🎀",
-								"chromuchromu",
-								"https://twitter.com/chromuchromu/",
-							),
-						},
-					},
-					Image: &discordgo.MessageEmbedImage{
-						URL: "https://pbs.twimg.com/media/FZ8WhlkXkAAug7p?format=png&name=large",
-					},
-					Footer: &discordgo.MessageEmbedFooter{
-						Text:    fmt.Sprintf("Requested by %s", ic.Member.User.Username),
-						IconURL: IconURL,
-					},
-					Timestamp: fmt.Sprint(time.Now().Format(time.RFC3339)),
-				},
-			},
-			Flags: discordgo.MessageFlagsEphemeral,
-		},
-	})
+	errMsgEmbed := embed.New(true).
+		SetTitle(title).
+		SetDescription(desc).
+		SetImage("https://pbs.twimg.com/media/FZ8WhlkXkAAug7p?format=png&name=large").
+		SetField(
+			".*･｡ﾟ*☆",
+			fmt.Sprintf(
+				"Artwork by: [%s](%s) 🎀",
+				"chromuchromu",
+				"https://twitter.com/chromuchromu/",
+			),
+			false,
+		).
+		SetFooter(fmt.Sprintf("Requested by %s", ic.Member.User.Username), IconURL).
+		SetTimestamp(fmt.Sprint(time.Now().Format(time.RFC3339))).
+		Bind()
+
+	errMsgEmbed.Use(errMsgEmbed.DeferredResponse, s, ic).With(ThrowSimpleInteractionError)
 }
 
 func ThrowSimpleInteractionError(s *discordgo.Session, ic *discordgo.InteractionCreate, err string) {
